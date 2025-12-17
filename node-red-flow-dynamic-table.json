@@ -1,0 +1,60 @@
+[
+    {
+        "id": "9ff1f3aa104c518d",
+        "type": "tab",
+        "label": "Dynamic Table",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "http-in-1",
+        "type": "http in",
+        "z": "9ff1f3aa104c518d",
+        "name": "Get Dynamic Table",
+        "url": "/api/getDynamicTable",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 170,
+        "y": 360,
+        "wires": [
+            [
+                "function-generate-1"
+            ]
+        ]
+    },
+    {
+        "id": "function-generate-1",
+        "type": "function",
+        "z": "9ff1f3aa104c518d",
+        "name": "Generate Dynamic Table Response",
+        "func": "// Parse query parameters\nconst query = msg.req.query || {};\nconst page = parseInt(query.page) || 1;\nconst pageSize = parseInt(query.pageSize) || 5;\nconst sortBy = query.sortBy || null;\nconst sortOrder = query.sortOrder || 'asc';\nconst tableType = query.tableType || 'normal'; // 'normal' or 'expandable'\n\n// Mock data - Users module with expandable support\nlet allData = [\n    { \n        id: 1, \n        fullName: \"Nguyễn Văn A\", \n        email: \"a@gmail.com\", \n        role: \"Admin\", \n        status: \"pending\", \n        createdAt: \"2025-10-15\",\n        children: tableType === 'expandable' ? [\n            { id: 101, item: \"Laptop Dell\", quantity: 2, price: 15000000, total: 30000000 },\n            { id: 102, item: \"Mouse Logitech\", quantity: 5, price: 500000, total: 2500000 },\n            { id: 103, item: \"Keyboard Mechanical\", quantity: 3, price: 2000000, total: 6000000 }\n        ] : []\n    },\n    { \n        id: 2, \n        fullName: \"Trần Thị B\", \n        email: \"b@gmail.com\", \n        role: \"Editor\", \n        status: \"active\", \n        createdAt: \"2025-10-16\",\n        children: tableType === 'expandable' ? [\n            { id: 201, item: \"Monitor LG 27inch\", quantity: 1, price: 7000000, total: 7000000 },\n            { id: 202, item: \"Webcam HD\", quantity: 2, price: 1500000, total: 3000000 }\n        ] : []\n    },\n    { \n        id: 4, \n        fullName: \"Phạm Thị D\", \n        email: \"d@gmail.com\", \n        role: \"Admin\", \n        status: \"reject\", \n        createdAt: \"2025-10-18\",\n        children: tableType === 'expandable' ? [\n            { id: 401, item: \"Tablet iPad\", quantity: 1, price: 12000000, total: 12000000 },\n            { id: 402, item: \"Apple Pencil\", quantity: 1, price: 3000000, total: 3000000 }\n        ] : []\n    },\n    { \n        id: 5, \n        fullName: \"Hoàng Văn E\", \n        email: \"e@gmail.com\", \n        role: \"Editor\", \n        status: \"pending\", \n        createdAt: \"2025-10-19\",\n        children: tableType === 'expandable' ? [\n            { id: 501, item: \"Printer Canon\", quantity: 1, price: 5000000, total: 5000000 },\n            { id: 502, item: \"Paper A4\", quantity: 10, price: 80000, total: 800000 }\n        ] : []\n    },\n    { \n        id: 7, \n        fullName: \"Đỗ Văn G\", \n        email: \"g@gmail.com\", \n        role: \"Admin\", \n        status: \"draft\", \n        createdAt: \"2025-10-21\",\n        children: tableType === 'expandable' ? [\n            { id: 701, item: \"SSD 1TB\", quantity: 2, price: 3000000, total: 6000000 },\n            { id: 702, item: \"RAM 16GB\", quantity: 4, price: 2500000, total: 10000000 }\n        ] : []\n    },\n    { \n        id: 8, \n        fullName: \"Bùi Thị H\", \n        email: \"h@gmail.com\", \n        role: \"Editor\", \n        status: \"active\", \n        createdAt: \"2025-10-22\",\n        children: tableType === 'expandable' ? [\n            { id: 801, item: \"USB 3.0 32GB\", quantity: 5, price: 200000, total: 1000000 }\n        ] : []\n    },\n    { \n        id: 10, \n        fullName: \"Trương Thị K\", \n        email: \"k@gmail.com\", \n        role: \"Admin\", \n        status: \"active\", \n        createdAt: \"2025-10-24\",\n        children: tableType === 'expandable' ? [\n            { id: 1001, item: \"Headphone Sony\", quantity: 2, price: 4000000, total: 8000000 },\n            { id: 1002, item: \"Microphone Blue Yeti\", quantity: 1, price: 6000000, total: 6000000 }\n        ] : []\n    },\n    { \n        id: 12, \n        fullName: \"Lý Thị M\", \n        email: \"m@gmail.com\", \n        role: \"Viewer\", \n        status: \"reject\", \n        createdAt: \"2025-10-26\",\n        children: tableType === 'expandable' ? [\n            { id: 1201, item: \"Projector Epson\", quantity: 1, price: 25000000, total: 25000000 },\n            { id: 1202, item: \"Screen 100inch\", quantity: 1, price: 5000000, total: 5000000 }\n        ] : []\n    }\n];\n\n// Remove children field if tableType is 'normal'\nif (tableType === 'normal') {\n    allData = allData.map(item => {\n        const { children, ...rest } = item;\n        return rest;\n    });\n}\n\n// Apply sorting\nif (sortBy) {\n    const sortField = sortBy;\n    const sortOrderValue = sortOrder === 'desc' ? -1 : 1;\n    \n    allData.sort((a, b) => {\n        let aVal = a[sortField];\n        let bVal = b[sortField];\n        \n        if (sortField === 'createdAt') {\n            aVal = new Date(aVal).getTime();\n            bVal = new Date(bVal).getTime();\n        }\n        \n        if (aVal < bVal) return -1 * sortOrderValue;\n        if (aVal > bVal) return 1 * sortOrderValue;\n        return 0;\n    });\n}\n\n// Calculate pagination\nconst total = allData.length;\nconst startIndex = (page - 1) * pageSize;\nconst endIndex = startIndex + pageSize;\nconst paginatedData = allData.slice(startIndex, endIndex);\n\n// Build base response\nconst baseResponse = {\n    meta: {\n        module: \"users\",\n        title: tableType === 'expandable' ? \"Quản lý người dùng (Bảng mở rộng)\" : \"Quản lý người dùng\",\n        idField: \"id\",\n        page: page,\n        pageSize: pageSize,\n        total: total,\n        expandable: tableType === 'expandable',\n        expandableField: tableType === 'expandable' ? 'children' : undefined\n    },\n    columns: [\n        {\n            key: \"fullName\",\n            title: \"Họ và tên\",\n            dataIndex: \"fullName\",\n            type: \"text\",\n            sortable: true\n        },\n        {\n            key: \"email\",\n            title: \"Email\",\n            dataIndex: \"email\",\n            type: \"text\",\n            sortable: true\n        },\n        {\n            key: \"role\",\n            title: \"Vai trò\",\n            dataIndex: \"role\",\n            type: \"tag\"\n        },\n        {\n            key: \"status\",\n            title: \"Trạng thái\",\n            dataIndex: \"status\",\n            type: \"badge\",\n            options: {\n                draft: { label: \"Nháp\", color: \"default\" },\n                pending: { label: \"Chờ duyệt\", color: \"orange\" },\n                active: { label: \"Hoạt động\", color: \"green\" },\n                reject: { label: \"Từ chối\", color: \"red\" }\n            }\n        },\n        {\n            key: \"createdAt\",\n            title: \"Ngày tạo\",\n            dataIndex: \"createdAt\",\n            type: \"date\",\n            format: \"DD/MM/YYYY\",\n            sortable: true\n        }\n    ],\n    data: paginatedData,\n    actions: [\n        {\n            key: \"edit\",\n            label: \"Sửa\",\n            visibleWhen: {\n                field: \"status\",\n                in: [\"draft\", \"reject\"]\n            }\n        },\n        {\n            key: \"delete\",\n            label: \"Xóa\",\n            confirm: {\n                title: \"Xác nhận\",\n                message: \"Bạn chắc chắn muốn xóa?\"\n            }\n        }\n    ]\n};\n\n// Add expandable columns if table type is expandable\nif (tableType === 'expandable') {\n    baseResponse.expandableColumns = [\n        {\n            key: \"item\",\n            title: \"Tên sản phẩm\",\n            dataIndex: \"item\",\n            type: \"text\"\n        },\n        {\n            key: \"quantity\",\n            title: \"Số lượng\",\n            dataIndex: \"quantity\",\n            type: \"text\",\n            sortable: true\n        },\n        {\n            key: \"price\",\n            title: \"Đơn giá\",\n            dataIndex: \"price\",\n            type: \"text\"\n        },\n        {\n            key: \"total\",\n            title: \"Thành tiền\",\n            dataIndex: \"total\",\n            type: \"text\"\n        }\n    ];\n}\n\nmsg.payload = baseResponse;\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 360,
+        "wires": [
+            [
+                "http-response-1"
+            ]
+        ]
+    },
+    {
+        "id": "http-response-1",
+        "type": "http response",
+        "z": "9ff1f3aa104c518d",
+        "name": "Response",
+        "statusCode": "200",
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "x": 830,
+        "y": 360,
+        "wires": []
+    }
+]
