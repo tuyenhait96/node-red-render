@@ -1,5 +1,8 @@
 FROM nodered/node-red:latest
 
-# Render uses PORT env var
-ENV PORT=1880
-EXPOSE 1880
+# Copy settings & flow vào image
+COPY settings.js /data/settings.js
+COPY node-red-flow-dynamic-table.json /data/node-red-flow-dynamic-table.json
+
+# Chạy Node-RED với settings custom
+CMD ["node-red", "-s", "/data/settings.js"]
